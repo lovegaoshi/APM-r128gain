@@ -11,30 +11,11 @@ app = FastAPI(docs_url=os.environ['DOCS_PATH'])
 MONGO_URL = os.environ['MONGO_PATH']
 DATABASE_NAME = "APM"
 COLLECTION_NAME = "r128gain"
+UPLOAD_PATH = os.environ['ADD_PATH']
+GETALL_PATH = os.environ['GET_PATH']
 
 
-# Routes
-
-
-@app.post(os.environ['ADD_PATH'], status_code=200)
-async def create_item(itemid: str, r128gain: str | None = None, abrepeat: str | None = None) -> None:
-    # MongoDB client setup
-    client = AsyncIOMotorClient(MONGO_URL)
-    db = client[DATABASE_NAME]
-    collection = db[COLLECTION_NAME]
-    new_item = {"itemid": itemid}
-    if r128gain is not None:
-        new_item["r128gain"] = r128gain
-    if abrepeat is not None:
-        new_item["abrepeat"] = abrepeat
-    try:
-        await collection.update_one({"itemid": itemid}, {"$set": new_item}, upsert=True)
-    except Exception as e:
-        logging.error(e)
-        raise HTTPException(status_code=400, detail="oh noe.")
-
-
-@app.get(os.environ['GET_PATH'])
+@app.get(GETALL_PATH)
 async def get_all() -> JSONResponse:
     # MongoDB client setup
     client = AsyncIOMotorClient(MONGO_URL)
