@@ -13,16 +13,15 @@ DATABASE_NAME = "APM"
 COLLECTION_NAME = "r128gain"
 
 
-# MongoDB client setup
-client = AsyncIOMotorClient(MONGO_URL)
-db = client[DATABASE_NAME]
-collection = db[COLLECTION_NAME]
-
 # Routes
 
 
 @app.post(os.environ['ADD_PATH'], status_code=200)
 async def create_item(itemid: str, r128gain: str | None = None, abrepeat: str | None = None) -> None:
+    # MongoDB client setup
+    client = AsyncIOMotorClient(MONGO_URL)
+    db = client[DATABASE_NAME]
+    collection = db[COLLECTION_NAME]
     new_item = {"itemid": itemid}
     if r128gain is not None:
         new_item["r128gain"] = r128gain
@@ -37,6 +36,10 @@ async def create_item(itemid: str, r128gain: str | None = None, abrepeat: str | 
 
 @app.get(os.environ['GET_PATH'])
 async def get_all() -> JSONResponse:
+    # MongoDB client setup
+    client = AsyncIOMotorClient(MONGO_URL)
+    db = client[DATABASE_NAME]
+    collection = db[COLLECTION_NAME]
     item = await collection.find({}, {"_id": False}).to_list(length=None)
     if item:
         json_compatible_item_data = jsonable_encoder(item)
