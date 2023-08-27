@@ -16,7 +16,7 @@ GETALL_PATH = os.environ['GET_PATH']
 
 
 @app.post(UPLOAD_PATH, status_code=200)
-async def create_item(itemid: str, r128gain: str | None = None, abrepeat: str | None = None) -> None:
+async def create_item(itemid: str, r128gain: str | None = None, abrepeat: str | None = None):
     # MongoDB client setup
     client = AsyncIOMotorClient(MONGO_URL)
     db = client[DATABASE_NAME]
@@ -28,6 +28,7 @@ async def create_item(itemid: str, r128gain: str | None = None, abrepeat: str | 
         new_item["abrepeat"] = abrepeat
     try:
         await collection.update_one({"itemid": itemid}, {"$set": new_item}, upsert=True)
+        return 'oK'
     except Exception as e:
         logging.error(e)
         raise HTTPException(status_code=400, detail="oh noe.")
