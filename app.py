@@ -8,6 +8,20 @@ import os
 
 app = FastAPI(docs_url=os.environ['DOCS_PATH'])
 
+# MongoDB configuration
+MONGO_URL = os.environ['MONGO_PATH']
+DATABASE_NAME = "APM"
+COLLECTION_NAME = "r128gain"
+
+
+# Data model
+
+
+class ItemCreate(BaseModel):
+    itemid: str
+    r128gain: str | None = None
+    abrepeat: str | None = None
+
 
 @app.get('/')
 async def hello_world():
