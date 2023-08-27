@@ -8,26 +8,7 @@ import os
 
 app = FastAPI(docs_url=os.environ['DOCS_PATH'])
 
-# MongoDB configuration
-MONGO_URL = os.environ['MONGO_PATH']
-DATABASE_NAME = "APM"
-COLLECTION_NAME = "r128gain"
 
-# MongoDB client setup
-client = AsyncIOMotorClient(MONGO_URL)
-db = client[DATABASE_NAME]
-collection = db[COLLECTION_NAME]
-
-# Data model
-
-
-class ItemCreate(BaseModel):
-    itemid: str
-    r128gain: str | None = None
-    abrepeat: str | None = None
-
-
-# Routes
 @app.get('/')
 async def hello_world():
     return 'Hello World!'
