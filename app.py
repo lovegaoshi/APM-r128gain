@@ -2,7 +2,6 @@ from fastapi import FastAPI, HTTPException
 from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel
 import logging
 import os
 
@@ -12,42 +11,16 @@ app = FastAPI(docs_url=os.environ['DOCS_PATH'])
 MONGO_URL = os.environ['MONGO_PATH']
 DATABASE_NAME = "APM"
 COLLECTION_NAME = "r128gain"
+UPLOAD_PATH = os.environ['ADD_PATH']
+GETALL_PATH = os.environ['GET_PATH']
 
 
-# MongoDB client setup
-client = AsyncIOMotorClient(MONGO_URL)
-db = client[DATABASE_NAME]
-collection = db[COLLECTION_NAME]
-ADD_PATH = os.environ['ADD_PATH']
-GET_PATH = os.environ['GET_PATH']
-
-# Data model
-
-
-class ItemCreate(BaseModel):
-    itemid: str
-    r128gain: str | None = None
-    abrepeat: str | None = None
-
-# Routes
-
-
-@app.post(ADD_PATH, status_code=200)
-async def create_item(item: ItemCreate) -> None:
-    new_item = {"itemid": item.itemid}
-    if item.r128gain is not None:
-        new_item["r128gain"] = item.r128gain
-    if item.abrepeat is not None:
-        new_item["abrepeat"] = item.abrepeat
-    try:
-        await collection.update_one({"itemid": item.itemid}, {"$set": new_item}, upsert=True)
-    except Exception as e:
-        logging.error(e)
-        raise HTTPException(status_code=400, detail="oh noe.")
-
-
-@app.get(GET_PATH)
+@app.get(GETALL_PATH)
 async def get_all() -> JSONResponse:
+    # MongoDB client setup
+    client = AsyncIOMotorClient(MONGO_URL)
+    db = client[DATABASE_NAME]
+    collection = db[COLLECTION_NAME]
     item = await collection.find({}, {"_id": False}).to_list(length=None)
     if item:
         json_compatible_item_data = jsonable_encoder(item)
