@@ -52,6 +52,12 @@ async def get_all() -> JSONResponse:
 
     raise HTTPException(status_code=404, detail="Item not found")
 
+
+@app.get('/')
+def hello_world():
+    return 'Hello World!'
+
+
 if __name__ == "__main__":
     import uvicorn
     logging.basicConfig(level=logging.DEBUG)
