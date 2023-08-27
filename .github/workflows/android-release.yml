@@ -1,4 +1,4 @@
-name: APM Automatic Release
+name: APM-R128gain scraper
 on:
   schedule:
     - cron: "0 0 * * 1"
@@ -6,7 +6,7 @@ on:
 jobs:
   buildAPK:
     runs-on: ubuntu-latest
-    name: build APK
+    name: scraper
     permissions:
       contents: write
     steps:
@@ -15,7 +15,7 @@ jobs:
 
       - name: python version_bump.py
         run: |
-          python scraper.py
+          python scraper.py ${{ secrets.VERCEL_GET_URL }}
 
       - name: commit
         run: |
