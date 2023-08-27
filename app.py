@@ -2,7 +2,6 @@ from fastapi import FastAPI, HTTPException
 from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel
 import logging
 import os
 
@@ -14,13 +13,36 @@ DATABASE_NAME = "APM"
 COLLECTION_NAME = "r128gain"
 
 
-# Data model
+# MongoDB client setup
+client = AsyncIOMotorClient(MONGO_URL)
+db = client[DATABASE_NAME]
+collection = db[COLLECTION_NAME]
+
+# Routes
 
 
-class ItemCreate(BaseModel):
-    itemid: str
-    r128gain: str | None = None
-    abrepeat: str | None = None
+@app.post(os.environ['ADD_PATH'], status_code=200)
+async def create_item(itemid: str, r128gain: str | None = None, abrepeat: str | None = None) -> None:
+    new_item = {"itemid": itemid}
+    if r128gain is not None:
+        new_item["r128gain"] = r128gain
+    if abrepeat is not None:
+        new_item["abrepeat"] = abrepeat
+    try:
+        await collection.update_one({"itemid": itemid}, {"$set": new_item}, upsert=True)
+    except Exception as e:
+        logging.error(e)
+        raise HTTPException(status_code=400, detail="oh noe.")
+
+
+@app.get(os.environ['GET_PATH'])
+async def get_all() -> JSONResponse:
+    item = await collection.find({}, {"_id": False}).to_list(length=None)
+    if item:
+        json_compatible_item_data = jsonable_encoder(item)
+        return JSONResponse(content=json_compatible_item_data)
+
+    raise HTTPException(status_code=404, detail="Item not found")
 
 
 @app.get('/')
