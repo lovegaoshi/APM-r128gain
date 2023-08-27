@@ -1,9 +1,7 @@
-@@ -0,0 +1,58 @@
 from fastapi import FastAPI, HTTPException
 from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel
 import logging
 import os
 from typing import Union
@@ -14,40 +12,35 @@ app = FastAPI(docs_url=os.environ['DOCS_PATH'])
 MONGO_URL = os.environ['MONGO_PATH']
 DATABASE_NAME = "APM"
 COLLECTION_NAME = "r128gain"
-ADD_PATH = os.environ['ADD_PATH']
-GET_PATH = os.environ['GET_PATH']
-# MongoDB client setup
-client = AsyncIOMotorClient(MONGO_URL)
-db = client[DATABASE_NAME]
-collection = db[COLLECTION_NAME]
-
-# Data model
+UPLOAD_PATH = os.environ['ADD_PATH']
+GETALL_PATH = os.environ['GET_PATH']
 
 
-class ItemCreate(BaseModel):
-    itemid: str
-    r128gain: Union(str, None) = None
-    abrepeat: Union(str, None) = None
-
-
-# Routes
-
-@app.post(ADD_PATH, status_code=200)
-async def create_item(item: ItemCreate) -> None:
-    new_item = {"itemid": item.itemid}
-    if item.r128gain is not None:
-        new_item["r128gain"] = item.r128gain
-    if item.abrepeat is not None:
-        new_item["abrepeat"] = item.abrepeat
+@app.post(UPLOAD_PATH, status_code=200)
+async def create_item(itemid: str, r128gain: Union[str, None] = None, abrepeat: Union[str, None] = None):
+    # MongoDB client setup
+    client = AsyncIOMotorClient(MONGO_URL)
+    db = client[DATABASE_NAME]
+    collection = db[COLLECTION_NAME]
+    new_item = {"itemid": itemid}
+    if r128gain is not None:
+        new_item["r128gain"] = r128gain
+    if abrepeat is not None:
+        new_item["abrepeat"] = abrepeat
     try:
-        await collection.update_one({"itemid": item.itemid}, {"$set": new_item}, upsert=True)
+        await collection.update_one({"itemid": itemid}, {"$set": new_item}, upsert=True)
+        return 'oK'
     except Exception as e:
         logging.error(e)
         raise HTTPException(status_code=400, detail="oh noe.")
 
 
-@app.get(GET_PATH)
+@app.get(GETALL_PATH)
 async def get_all() -> JSONResponse:
+    # MongoDB client setup
+    client = AsyncIOMotorClient(MONGO_URL)
+    db = client[DATABASE_NAME]
+    collection = db[COLLECTION_NAME]
     item = await collection.find({}, {"_id": False}).to_list(length=None)
     if item:
         json_compatible_item_data = jsonable_encoder(item)
@@ -59,6 +52,7 @@ async def get_all() -> JSONResponse:
 @app.get('/')
 async def hello_world():
     return 'Hello World!'
+
 
 if __name__ == "__main__":
     import uvicorn
