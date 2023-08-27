@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 import logging
 import os
+from typing import Union
 
 app = FastAPI(docs_url=os.environ['DOCS_PATH'])
 
@@ -16,7 +17,7 @@ GETALL_PATH = os.environ['GET_PATH']
 
 
 @app.post(UPLOAD_PATH, status_code=200)
-async def create_item(itemid: str, r128gain: str | None = None, abrepeat: str | None = None):
+async def create_item(itemid: str, r128gain: Union[str, None] = None, abrepeat: Union[str, None] = None):
     # MongoDB client setup
     client = AsyncIOMotorClient(MONGO_URL)
     db = client[DATABASE_NAME]
