@@ -29,9 +29,11 @@ async def create_item(itemid: str, r128gain: Union[str, None] = None, abrepeat: 
         new_item["abrepeat"] = abrepeat
     try:
         await collection.update_one({"itemid": itemid}, {"$set": new_item}, upsert=True)
+        client.close()
         return 'oK'
     except Exception as e:
         logging.error(e)
+        client.close()
         raise HTTPException(status_code=400, detail="oh noe.")
 
 
@@ -44,8 +46,10 @@ async def get_all() -> JSONResponse:
     item = await collection.find({}, {"_id": False}).to_list(length=None)
     if item:
         json_compatible_item_data = jsonable_encoder(item)
+        client.close()
         return JSONResponse(content=json_compatible_item_data)
 
+    client.close()
     raise HTTPException(status_code=404, detail="Item not found")
 
 
