@@ -17,7 +17,7 @@ GETALL_PATH = os.environ['GET_PATH']
 
 
 @app.post(UPLOAD_PATH, status_code=200)
-async def create_item(itemid: str, r128gain: Union[str, None] = None, abrepeat: Union[str, None] = None):
+async def create_item(itemid: str, r128gain: Union[float, None] = None, abrepeat: Union[str, None] = None):
     # MongoDB client setup
     client = AsyncIOMotorClient(MONGO_URL)
     db = client[DATABASE_NAME]
