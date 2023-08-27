@@ -21,7 +21,7 @@ jobs:
         run: |
           git config --global user.email lovegaoshi@gaoshi.com
           git config --global user.name lovegaoshi
-          git commit -m "build: release version bump" -a
+          git commit -m "chore: weekly r128gain scrape" -a
 
       - name: Push changes to master
         uses: ad-m/github-push-action@master
