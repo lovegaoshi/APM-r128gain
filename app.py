@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -16,7 +16,6 @@ UPLOAD_PATH = os.environ['ADD_PATH']
 GETALL_PATH = os.environ['GET_PATH']
 
 
-@app.post(UPLOAD_PATH, status_code=200)
 async def create_item(itemid: str, r128gain: Union[float, None] = None, abrepeat: Union[str, None] = None):
     # MongoDB client setup
     client = AsyncIOMotorClient(MONGO_URL)
@@ -29,6 +28,23 @@ async def create_item(itemid: str, r128gain: Union[float, None] = None, abrepeat
         new_item["abrepeat"] = abrepeat
     try:
         await collection.update_one({"itemid": itemid}, {"$set": new_item}, upsert=True)
+        client.close()
+        return 'oK'
+    except Exception as e:
+        logging.error(e)
+        client.close()
+        raise HTTPException(status_code=400, detail="oh noe.")
+
+
+@app.post(UPLOAD_PATH, status_code=200)
+async def create_items(request: Request):
+    client = AsyncIOMotorClient(MONGO_URL)
+    db = client[DATABASE_NAME]
+    collection = db[COLLECTION_NAME]
+    data = await request.json()
+    try:
+        for entry in data:
+            await collection.update_one({"itemid": entry["itemid"]}, {"$set": entry}, upsert=True)
         client.close()
         return 'oK'
     except Exception as e:
