@@ -1,7 +1,7 @@
 # APM-r128gain
 b站视频音量增益收集
 
-这是[APM](https://github.com/lovegaoshi/azusa-player-mobile)上传的b站r128gain音量增益数值集合。
+这是[电梓播放器](https://github.com/lovegaoshi/azusa-player-mobile)上传的b站r128gain音量增益数值集合。
 
 内容见https://github.com/lovegaoshi/APM-r128gain/blob/main/rules.json
 
