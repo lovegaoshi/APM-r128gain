@@ -10,7 +10,7 @@ import gzip
 import JSON
 
 app = FastAPI(docs_url=os.environ['DOCS_PATH'])
-app.add_middleware(GZipMiddleware, minimum_size=500)
+# app.add_middleware(GZipMiddleware, minimum_size=500)
 
 # MongoDB configuration
 MONGO_URL = os.environ['MONGO_PATH']
