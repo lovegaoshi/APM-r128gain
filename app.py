@@ -6,11 +6,10 @@ from fastapi.encoders import jsonable_encoder
 import logging
 import os
 from typing import Union
-import gzip
-import JSON
+# import gzip
 
 app = FastAPI(docs_url=os.environ['DOCS_PATH'])
-# app.add_middleware(GZipMiddleware, minimum_size=500)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # MongoDB configuration
 MONGO_URL = os.environ['MONGO_PATH']
@@ -45,10 +44,8 @@ async def create_items(request: Request):
     client = AsyncIOMotorClient(MONGO_URL)
     db = client[DATABASE_NAME]
     collection = db[COLLECTION_NAME]
-    bodydata = await request.body()
+    data = await request.json()
     try:
-        decompressed = gzip.decompress(bodydata)
-        data = JSON.loads(str(decompressed))
         for entry in data:
             await collection.update_one({"itemid": entry["itemid"]}, {"$set": entry}, upsert=True)
         client.close()
